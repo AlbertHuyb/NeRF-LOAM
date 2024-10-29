@@ -1,7 +1,7 @@
 import os  # noqa
 import sys  # noqa
 sys.path.insert(0, os.path.abspath('src')) # noqa
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import random
 from parser import get_parser
 import numpy as np

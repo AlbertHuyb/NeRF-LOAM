@@ -1,0 +1,16 @@
+base_config: configs/ss3dm/ss3dm.yaml
+
+exp_name: ss3dm/Town06_150
+
+
+
+data_specs:
+  data_path: '/data/huyb/cvpr-2024/data/ss3dm/DATA/Town06/Town06_150/'
+  use_gt: True
+  max_depth: 80
+  min_depth: 5
+
+tracker_specs:
+  start_frame: 0
+  end_frame: -1
+  read_offset: 1

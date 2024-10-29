@@ -164,6 +164,14 @@ class MeshExtractor:
 
             total_verts += [verts]
             total_faces += [faces]
-        total_verts = np.concatenate(total_verts)
-        total_faces = np.concatenate(total_faces)
+        
+        if len(total_verts) == 0:
+            total_verts = np.zeros((0, 3))
+        else:
+            total_verts = np.concatenate(total_verts)
+        
+        if len(total_faces) == 0:
+            total_faces = np.zeros((0, 3))
+        else:
+            total_faces = np.concatenate(total_faces)
         return total_verts, total_faces

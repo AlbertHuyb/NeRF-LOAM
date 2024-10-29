@@ -13,6 +13,10 @@ def sample_rays(mask, num_samples):
     B, H, W = mask.shape
     probs = mask / (mask.sum() + 1e-9)
     flatten_probs = probs.reshape(B, -1)
+    
+    if flatten_probs.shape[-1] < num_samples:
+        num_samples = flatten_probs.shape[-1]
+        
     sampled_index = sampling_without_replacement(
         torch.log(flatten_probs + 1e-9), num_samples)
     sampled_masks = (torch.zeros_like(

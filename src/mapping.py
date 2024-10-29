@@ -17,7 +17,7 @@ from pathlib import Path
 import open3d as o3d
 
 torch.classes.load_library(
-    "/home/pl21n4/Programmes/Vox-Fusion/third_party/sparse_octree/build/lib.linux-x86_64-cpython-38/svo.cpython-38-x86_64-linux-gnu.so")
+    "/data/huyb/cvpr-2024/NeRF-LOAM/third_party/sparse_octree/build/lib.linux-x86_64-cpython-38/svo.cpython-38-x86_64-linux-gnu.so")
 
 
 def get_network_size(net):
@@ -138,6 +138,7 @@ class Mapping:
                                             update_pose=False, update_decoder=False, selection_method='random')
 
 
+                    print("mesh_res: ", self.mesh_res)
                     self.logger.log_mesh(self.extract_mesh(res=self.mesh_res, clean_mesh=False),name=f"mesh_{tracked_frame.index:05d}.ply")
                     pose = self.get_updated_poses()
                     self.logger.log_numpy_data(np.asarray(pose), f"frame_poses_{tracked_frame.index:05d}")
@@ -272,10 +273,20 @@ class Mapping:
                                                                    < valid_distance) & (torch.abs(frame.points[:, 2]) < valid_distance)
         new_keyframe_points = frame.points[mask]
         new_keyframe_pointsCos = frame.get_pointsCos()[mask]
+        # import pdb; pdb.set_trace()
         new_keyframe = LidarFrame(frame.index, new_keyframe_points, new_keyframe_pointsCos,
                                   frame.pose, new_keyframe=True)
+        print("new keyframe id", new_keyframe.index)
+        print("new keyframe points shape", new_keyframe_points.shape[0])
         if new_keyframe_points.shape[0] < 2*self.n_rays:
-            raise ValueError('valid_distance too small')
+            # raise ValueError('valid_distance too small')
+            print('valid_distance too small')
+            # repeat several time to get enough points
+            max_time = (2*self.n_rays) // new_keyframe_points.shape[0] + 1
+            new_keyframe_points = new_keyframe_points.repeat(max_time, 1)
+            new_keyframe_pointsCos = new_keyframe_pointsCos.repeat(max_time, 1)
+            print("new keyframe points shape", new_keyframe_points.shape[0])
+                
         self.current_keyframe = new_keyframe
         self.keyframe_graph += [new_keyframe]
         # self.update_grid_features()
@@ -396,7 +407,8 @@ class Mapping:
         pose = tracked_frame.get_pose().detach().cpu().numpy()
         pose[:3, 3] += offset
         frame_poses = self.get_updated_poses()
-        mesh = self.extract_mesh(res=8, clean_mesh=True)
+        # mesh = self.extract_mesh(res=8, clean_mesh=True)
+        mesh = self.extract_mesh(res=8, clean_mesh=False)
         voxels = self.extract_voxels().detach().cpu().numpy()
         keyframe_poses = [p.get_pose().detach().cpu().numpy()
                           for p in self.keyframe_graph]
